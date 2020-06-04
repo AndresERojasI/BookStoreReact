@@ -1,25 +1,53 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import {Container, Row, Col, Card, Button} from 'react-bootstrap';
 
 function App() {
+  const apiUrl = "http://localhost:3004";
+
+  const [books, setBooks] = useState([]);
+
+  useEffect (() => {
+    // We use a IIFE to call the API
+    (async function getBooks () {
+      try {
+        const booksResponse = await axios.get(`${apiUrl}/books`);
+        setBooks(booksResponse.data);
+      } catch (error) {
+        alert("Could not load books")
+      }
+    })()
+  }, [])
+
+  const filterBooks = id => {
+    const book = books.filter(book => book.id === id)
+    setBooks(book)
+  } 
+
+const booksList = books => books.map(book => (
+  <Card key={book.id} style={{ width: '18rem' }}>
+  <Card.Img variant="top" src="https://assets.entrepreneur.com/content/3x2/2000/20191219170611-GettyImages-1152794789.jpeg" />
+  <Card.Body>
+  <Card.Title>{book.title}</Card.Title>
+    <Card.Text>
+      {book.description}
+    </Card.Text>
+    <Button variant="primary" id={book.id} onClick={() => filterBooks(book.id)}>See Book</Button>
+  </Card.Body>
+  </Card>
+))
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <Row className="justify-content-md-center">
+          <h1>List of Books</h1>
+          {
+            !books ?
+            <h2>loading books...</h2>:
+            booksList(books)
+          }
+      </Row>
+    </Container>
   );
 }
 
