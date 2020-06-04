@@ -6,17 +6,16 @@ function App() {
   const apiUrl = "http://localhost:3004";
 
   const [books, setBooks] = useState([]);
-
+  const getBooks = async () => {
+    try {
+      const booksResponse = await axios.get(`${apiUrl}/books`);
+      setBooks(booksResponse.data);
+    } catch (error) {
+      alert("Could not load books")
+    }
+  }
   useEffect (() => {
-    // We use a IIFE to call the API
-    (async function getBooks () {
-      try {
-        const booksResponse = await axios.get(`${apiUrl}/books`);
-        setBooks(booksResponse.data);
-      } catch (error) {
-        alert("Could not load books")
-      }
-    })()
+    getBooks();
   }, [])
 
   const filterBooks = id => {
@@ -33,6 +32,7 @@ const booksList = books => books.map(book => (
       {book.description}
     </Card.Text>
     <Button variant="primary" id={book.id} onClick={() => filterBooks(book.id)}>See Book</Button>
+    <Button variant="primary" id={book.id} onClick={() => getBooks()}>Reload Books</Button>
   </Card.Body>
   </Card>
 ))
@@ -40,7 +40,9 @@ const booksList = books => books.map(book => (
   return (
     <Container>
       <Row className="justify-content-md-center">
+          <Col>
           <h1>List of Books</h1>
+          </Col>
           {
             !books ?
             <h2>loading books...</h2>:
